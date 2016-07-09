@@ -28,5 +28,5 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile 'com.android.support:recyclerview-v7:24.0.0'
-    compile project(path: ':vitamio')
+    compile project(path: ':vlc')
 }

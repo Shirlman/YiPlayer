@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
     defaultConfig {
         applicationId "com.shirlman.yishi"
@@ -21,12 +21,12 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:design:24.0.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.birbit:android-priority-jobqueue:2.0.0-alpha5'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.android.support:recyclerview-v7:24.0.0'
     compile project(path: ':vitamio')
 }

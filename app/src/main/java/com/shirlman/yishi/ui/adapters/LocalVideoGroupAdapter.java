@@ -13,13 +13,11 @@ import com.shirlman.yishi.R;
 import com.shirlman.yishi.events.VideoEvents;
 import com.shirlman.yishi.models.VideoGroup;
 import com.shirlman.yishi.models.VideoInfo;
+import com.shirlman.yishi.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by KB-Server on 2016/6/25.
@@ -47,12 +45,7 @@ public class LocalVideoGroupAdapter extends RecyclerView.Adapter <LocalVideoGrou
 
         ImageLoader.getInstance().displayImage("file://" + firstVideoInfo.getThumbPath(), holder.firstVideoThumb);
 
-        String timeFormat = firstVideoInfo.getDuration() > 60 * 60 * 1000 ? "HH:mm:ss" : "mm:ss";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(timeFormat, Locale.ENGLISH);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
-        String duration = simpleDateFormat.format(firstVideoInfo.getDuration());
-        holder.firstVideoDuration.setText(duration);
-
+        holder.firstVideoDuration.setText(StringUtils.getTimeDisplayString(firstVideoInfo.getDuration()));
         holder.videoGroupName.setText(videoGroup.getGroupName());
 
         String videoCount = String.format(

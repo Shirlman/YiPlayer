@@ -4,11 +4,23 @@
     android:layout_height="match_parent"
     android:background="@color/black"
     android:id="@+id/video_layout" >
-    <io.vov.vitamio.widget.VideoView
-        android:id="@+id/video_view"
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"/>
+        android:background="@android:color/black">
+        <org.videolan.libvlc.media.VideoView
+            android:id="@+id/video_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+
+        <SurfaceView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:id="@+id/subtitle_view"/>
+    </FrameLayout>
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,4 +37,6 @@
         android:maxWidth="600dp"
         android:visibility="gone"
         android:text="subtitle too much long, subtitle too much long, subtitle too much long, subtitle too much long"/>
+
+    <include layout="@layout/video_controller" />
 </RelativeLayout>

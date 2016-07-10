@@ -14,12 +14,9 @@ import com.shirlman.yishi.events.VideoEvents;
 import com.shirlman.yishi.models.VideoGroup;
 import com.shirlman.yishi.models.VideoInfo;
 import com.shirlman.yishi.util.FileUtils;
+import com.shirlman.yishi.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by KB-Server on 2016/6/25.
@@ -47,15 +44,8 @@ public class LocalVideoAdapter extends RecyclerView.Adapter <LocalVideoAdapter.V
         ImageLoader.getInstance().displayImage("file://" + videoInfo.getThumbPath(), holder.videoThumb);
 
         holder.videoTitle.setText(videoInfo.getTitle());
-
-        String timeFormat = videoInfo.getDuration() > 60 * 60 * 1000 ? "HH:mm:ss" : "mm:ss";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(timeFormat, Locale.ENGLISH);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
-        String duration = simpleDateFormat.format(videoInfo.getDuration());
-        holder.videoDuration.setText(duration);
-
-        String videoSize = FileUtils.showFileSize(videoInfo.getSize());
-        holder.videoSize.setText(videoSize);
+        holder.videoDuration.setText(StringUtils.getTimeDisplayString(videoInfo.getDuration()));
+        holder.videoSize.setText(FileUtils.showFileSize(videoInfo.getSize()));
 
         holder.videoThumb.setOnClickListener(new View.OnClickListener() {
             @Override

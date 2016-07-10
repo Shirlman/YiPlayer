@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.text.TextPaint;
@@ -57,6 +58,13 @@ public class StringUtils {
 		}
 
 		return stringBuilder.toString();
+	}
+
+	public static String getTimeDisplayString(long milliSeconds) {
+		String timeFormat = milliSeconds > 60 * 60 * 1000 ? "HH:mm:ss" : "mm:ss";
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(timeFormat, Locale.ENGLISH);
+		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
+		return simpleDateFormat.format(milliSeconds);
 	}
 
 	public static String currentTimeString() {

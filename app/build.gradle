@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.0"
 
     defaultConfig {
-        applicationId "com.shirlman.yishi"
+        applicationId "com.shirlman.yiplayer"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1

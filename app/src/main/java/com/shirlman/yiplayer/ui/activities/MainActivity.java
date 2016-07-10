@@ -1,4 +1,4 @@
-package com.shirlman.yishi.ui.activities;
+package com.shirlman.yiplayer.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,12 +13,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.shirlman.yishi.R;
-import com.shirlman.yishi.events.VideoEvents;
-import com.shirlman.yishi.models.VideoGroup;
-import com.shirlman.yishi.models.VideoInfo;
-import com.shirlman.yishi.ui.fragments.LocalVideoFragment;
-import com.shirlman.yishi.ui.fragments.LocalVideoGroupFragment;
+import com.shirlman.yiplayer.R;
+import com.shirlman.yiplayer.events.VideoEvents;
+import com.shirlman.yiplayer.models.VideoGroup;
+import com.shirlman.yiplayer.models.VideoInfo;
+import com.shirlman.yiplayer.ui.fragments.LocalVideoFragment;
+import com.shirlman.yiplayer.ui.fragments.LocalVideoGroupFragment;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

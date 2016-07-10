@@ -1,7 +1,7 @@
-package com.shirlman.yishi.events;
+package com.shirlman.yiplayer.events;
 
-import com.shirlman.yishi.models.VideoGroup;
-import com.shirlman.yishi.models.VideoInfo;
+import com.shirlman.yiplayer.models.VideoGroup;
+import com.shirlman.yiplayer.models.VideoInfo;
 
 import java.util.List;
 

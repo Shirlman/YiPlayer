@@ -1,4 +1,4 @@
-package com.shirlman.yishi.util;
+package com.shirlman.yiplayer.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

@@ -1,4 +1,4 @@
-package com.shirlman.yishi.ui.fragments;
+package com.shirlman.yiplayer.ui.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,12 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.shirlman.yishi.MyApplication;
-import com.shirlman.yishi.R;
-import com.shirlman.yishi.events.VideoEvents;
-import com.shirlman.yishi.jobs.GetLocalVideoListJob;
-import com.shirlman.yishi.models.VideoGroup;
-import com.shirlman.yishi.ui.adapters.LocalVideoGroupAdapter;
+import com.shirlman.yiplayer.MyApplication;
+import com.shirlman.yiplayer.R;
+import com.shirlman.yiplayer.events.VideoEvents;
+import com.shirlman.yiplayer.jobs.GetLocalVideoListJob;
+import com.shirlman.yiplayer.models.VideoGroup;
+import com.shirlman.yiplayer.ui.adapters.LocalVideoGroupAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

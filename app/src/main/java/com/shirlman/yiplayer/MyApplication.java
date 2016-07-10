@@ -1,4 +1,4 @@
-package com.shirlman.yishi;
+package com.shirlman.yiplayer;
 
 import android.app.Application;
 

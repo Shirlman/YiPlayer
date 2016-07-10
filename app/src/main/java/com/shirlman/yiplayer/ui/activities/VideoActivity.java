@@ -1,28 +1,23 @@
-package com.shirlman.yishi.ui.activities;
+package com.shirlman.yiplayer.ui.activities;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.shirlman.yishi.R;
-import com.shirlman.yishi.models.VideoInfo;
-import com.shirlman.yishi.util.StringUtils;
+import com.shirlman.yiplayer.R;
+import com.shirlman.yiplayer.models.VideoInfo;
+import com.shirlman.yiplayer.util.StringUtils;
 
-import org.videolan.libvlc.MediaPlayer;
 import org.videolan.libvlc.media.VideoView;
 
 import java.util.Timer;

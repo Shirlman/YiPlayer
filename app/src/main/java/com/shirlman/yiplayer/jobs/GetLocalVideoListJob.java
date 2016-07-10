@@ -1,4 +1,4 @@
-package com.shirlman.yishi.jobs;
+package com.shirlman.yiplayer.jobs;
 
 import android.database.Cursor;
 import android.provider.MediaStore;
@@ -8,10 +8,10 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.shirlman.yishi.MyApplication;
-import com.shirlman.yishi.events.VideoEvents;
-import com.shirlman.yishi.models.VideoGroup;
-import com.shirlman.yishi.models.VideoInfo;
+import com.shirlman.yiplayer.MyApplication;
+import com.shirlman.yiplayer.events.VideoEvents;
+import com.shirlman.yiplayer.models.VideoGroup;
+import com.shirlman.yiplayer.models.VideoInfo;
 
 import org.greenrobot.eventbus.EventBus;
 

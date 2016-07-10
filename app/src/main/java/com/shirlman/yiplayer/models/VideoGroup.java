@@ -1,4 +1,4 @@
-package com.shirlman.yishi.models;
+package com.shirlman.yiplayer.models;
 
 import java.io.Serializable;
 import java.util.List;

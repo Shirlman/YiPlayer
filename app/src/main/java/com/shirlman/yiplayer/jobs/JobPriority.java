@@ -1,4 +1,4 @@
-package com.shirlman.yishi.jobs;
+package com.shirlman.yiplayer.jobs;
 
 /**
  * Created by KB-Server on 2016/6/24.

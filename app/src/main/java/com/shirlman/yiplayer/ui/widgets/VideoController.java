@@ -1,11 +1,7 @@
-package com.shirlman.yishi.ui.widgets;
+package com.shirlman.yiplayer.ui.widgets;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
-
-import com.shirlman.yishi.R;
-import com.shirlman.yishi.models.VideoInfo;
 
 
 /**

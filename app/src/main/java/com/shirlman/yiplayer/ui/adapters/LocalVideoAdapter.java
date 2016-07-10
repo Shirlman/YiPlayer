@@ -1,4 +1,4 @@
-package com.shirlman.yishi.ui.adapters;
+package com.shirlman.yiplayer.ui.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,12 +9,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.shirlman.yishi.R;
-import com.shirlman.yishi.events.VideoEvents;
-import com.shirlman.yishi.models.VideoGroup;
-import com.shirlman.yishi.models.VideoInfo;
-import com.shirlman.yishi.util.FileUtils;
-import com.shirlman.yishi.util.StringUtils;
+import com.shirlman.yiplayer.R;
+import com.shirlman.yiplayer.events.VideoEvents;
+import com.shirlman.yiplayer.models.VideoGroup;
+import com.shirlman.yiplayer.models.VideoInfo;
+import com.shirlman.yiplayer.util.FileUtils;
+import com.shirlman.yiplayer.util.StringUtils;
 
 import org.greenrobot.eventbus.EventBus;
 

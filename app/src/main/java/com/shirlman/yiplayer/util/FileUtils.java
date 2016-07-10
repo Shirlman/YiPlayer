@@ -1,4 +1,4 @@
-package com.shirlman.yishi.util;
+package com.shirlman.yiplayer.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -13,7 +13,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.util.Log;
 
-import com.shirlman.yishi.models.VideoInfo;
+import com.shirlman.yiplayer.models.VideoInfo;
 
 public class FileUtils {
 	// http://www.fileinfo.com/filetypes/video , "dat" , "bin" , "rms"

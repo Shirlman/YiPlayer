@@ -1,1 +1,1 @@
-include ':app', ':vlc'
+include ':app', ':vlc', ':subtitle'

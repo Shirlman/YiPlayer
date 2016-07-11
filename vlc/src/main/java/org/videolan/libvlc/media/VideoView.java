@@ -291,28 +291,24 @@ public class VideoView extends SurfaceView
     }
 
     private void setVideoSize() {
-        WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        Display display = windowManager.getDefaultDisplay();
-        Point point = new Point();
-        display.getSize(point);
+        int viewWidth = this.getWidth();
+        int viewHeight = this.getHeight();
 
-        ViewGroup.LayoutParams layoutParams = this.getLayoutParams();
-
-        int layoutWidth = point.x;
-        int layoutHeight = point.y;
+        int layoutWidth = viewWidth;
+        int layoutHeight = viewHeight;
 
         float videoRatio = mVideoWidth / (float) mVideoHeight;
-        float screenRatio = point.x / (float) point.y;
+        float screenRatio = viewWidth / (float) viewHeight;
 
         if(videoRatio > screenRatio) {
-            layoutHeight = (int) Math.ceil(point.x / videoRatio);
+            layoutHeight = (int) Math.ceil(viewWidth / videoRatio);
         } else {
-            layoutWidth = (int) Math.ceil(point.y * videoRatio);
+            layoutWidth = (int) Math.ceil(viewHeight * videoRatio);
         }
 
+        ViewGroup.LayoutParams layoutParams = this.getLayoutParams();
         layoutParams.width  = layoutWidth;
         layoutParams.height = layoutHeight;
-
         this.setLayoutParams(layoutParams);
     }
 

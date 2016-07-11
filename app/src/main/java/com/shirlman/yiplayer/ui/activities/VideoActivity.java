@@ -1,5 +1,6 @@
 package com.shirlman.yiplayer.ui.activities;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -115,7 +116,12 @@ public class VideoActivity extends AppCompatActivity {
         mVideoControllerTotalTime.setText(StringUtils.getTimeDisplayString(mVideoView.getDuration()));
         mVideoControllerPlayOrPause.setOnClickListener(mOnPlayOrPauseClickListener);
         mVideoControllerVideoLock.setOnClickListener(mOnLockClickListener);
-        mVideoControllerVideoSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
+
+        if(mVideoView.canSeekForward() || mVideoView.canSeekBackward()) {
+            mVideoControllerVideoSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
+        } else {
+            mVideoControllerVideoSeekBar.setEnabled(false);
+        }
 
         mVideoView.setOnCurrentTimeUpdateListener(mOnCurrentTimeUpdateListener);
         mVideoView.setOnCompletionListener(mOnCompletionListener);
@@ -190,7 +196,10 @@ public class VideoActivity extends AppCompatActivity {
         public void onCurrentTimeUpdate(int currentTime) {
             if(!mIsTouchingVideoSeekBar) {
                 mVideoControllerCurrentTime.setText(StringUtils.getTimeDisplayString(currentTime));
-                mVideoControllerVideoSeekBar.setProgress(currentTime * 100 / mVideoView.getDuration());
+
+                if(mVideoView.getDuration() != 0) {
+                    mVideoControllerVideoSeekBar.setProgress(currentTime * 100 / mVideoView.getDuration());
+                }
             }
         }
     };
@@ -259,7 +268,9 @@ public class VideoActivity extends AppCompatActivity {
         public void onStartTrackingTouch(SeekBar seekBar) {
             mIsTouchingVideoSeekBar = true;
 
-            mHideVideoControllerTimer.cancel();
+            if(mHideVideoControllerTimer != null) {
+                mHideVideoControllerTimer.cancel();
+            }
         }
 
         @Override

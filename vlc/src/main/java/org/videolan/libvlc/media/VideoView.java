@@ -8,23 +8,29 @@ package org.videolan.libvlc.media;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Display;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.MediaController;
 
 
 import org.videolan.libvlc.*;
 import org.videolan.libvlc.MediaPlayer;
+import org.videolan.libvlc.subtitle.Caption;
+import org.videolan.libvlc.subtitle.TimedTextObject;
+import org.videolan.libvlc.subtitle.TimedTextUtil;
+
+import java.util.Collection;
+import java.util.TimerTask;
 
 public class VideoView extends SurfaceView
         implements MediaController.MediaPlayerControl, IVLCVout.Callback, MediaPlayer.EventListener {
@@ -39,6 +45,13 @@ public class VideoView extends SurfaceView
     private SurfaceView mSubtitlesView;
     private boolean mPausable;
     private int mBufferPercentage;
+    private String mVideoPath;
+    private String mTimedTextPath;
+    private boolean mTimedTextLoaded;
+    private AsyncTask mTimedTextProcessingTask;
+    private TimerTask mTimedTextProcessor;
+    private TimedTextObject mTimedTextObject;
+    private Handler mTimedTextHandler = new Handler();
 
     private final int MSG_PREPARED = 0;
     private final int MSG_COMPLETION = 1;
@@ -51,6 +64,7 @@ public class VideoView extends SurfaceView
     private OnErrorListener mOnErrorListener;
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
     private OnCurrentTimeUpdateListener mOnCurrentTimeUpdateListener;
+    private OnTimedTextListener mOnTimedTextListener;
 
     public interface OnCompletionListener {
         void onCompletion();
@@ -72,6 +86,10 @@ public class VideoView extends SurfaceView
         void onCurrentTimeUpdate(int currentTime);
     }
 
+    public interface OnTimedTextListener {
+        void onTimedText(Spanned spanned);
+    }
+
     public void setOnPreparedListener(OnPreparedListener onPreparedListener) {
         mOnPreparedListener = onPreparedListener;
     }
@@ -90,6 +108,10 @@ public class VideoView extends SurfaceView
 
     public void setOnCurrentTimeUpdateListener(OnCurrentTimeUpdateListener onCurrentTimeUpdateListener) {
         mOnCurrentTimeUpdateListener = onCurrentTimeUpdateListener;
+    }
+
+    public void setOnTimedTextListener(OnTimedTextListener onTimedTextListener) {
+        mOnTimedTextListener = onTimedTextListener;
     }
 
     private Handler mHandler = new Handler() {
@@ -164,6 +186,8 @@ public class VideoView extends SurfaceView
     public void setVideoPath(String path) {
         Media media = new Media(mLibVLC, path);
         mMediaPlayer.setMedia(media);
+
+        mVideoPath = path;
     }
 
     public void setVideoURI(Uri uri) {
@@ -171,17 +195,25 @@ public class VideoView extends SurfaceView
         mMediaPlayer.setMedia(media);
     }
 
-    public void addTimedTextSource(SurfaceView subtitlesView, String path) {
+    public void addSubtitleSource(SurfaceView subtitlesView, String path) {
         mMediaPlayer.addSlave(Media.Slave.Type.Subtitle, path, false);
-        setSubtitlesView(subtitlesView);
+        setSubtitlesSurfaceView(subtitlesView);
     }
 
-    public void addTimedTextSource(SurfaceView subtitlesView, Uri uri) {
+    public void addSubtitleSource(SurfaceView subtitlesView, Uri uri) {
         mMediaPlayer.addSlave(Media.Slave.Type.Subtitle, uri, false);
-        setSubtitlesView(subtitlesView);
+        setSubtitlesSurfaceView(subtitlesView);
     }
 
-    private void setSubtitlesView(SurfaceView surfaceView) {
+    public void addTimedTextSource(String path) {
+        mTimedTextPath = path;
+    }
+
+    public void addTimedTextSource(Uri uri) {
+
+    }
+
+    private void setSubtitlesSurfaceView(SurfaceView surfaceView) {
         mSubtitlesView = surfaceView;
         mSubtitlesView.setZOrderMediaOverlay(true);
         mSubtitlesView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -197,6 +229,10 @@ public class VideoView extends SurfaceView
             mMediaPlayer.getVLCVout().setSubtitlesView(mSubtitlesView);
         }
 
+        if(mTimedTextPath != null) {
+            startTimedTextProcessing(mTimedTextPath);
+        }
+
         mMediaPlayer.getVLCVout().attachViews();
 
         mMediaPlayer.setEventListener(this);
@@ -207,6 +243,8 @@ public class VideoView extends SurfaceView
     @Override
     public void pause() {
         mMediaPlayer.pause();
+
+        pauseTimedTextProcessing();
     }
 
     public void resume() {
@@ -215,15 +253,21 @@ public class VideoView extends SurfaceView
         } else {
             start();
         }
+
+        resumeTimedTextProcessing();
     }
 
     public void stop() {
         mMediaPlayer.stop();
+
+        stopTimedTextProcessing();
     }
 
     public void release() {
         mMediaPlayer.stop();
         mMediaPlayer.release();
+
+        stopTimedTextProcessing();
     }
 
     @Override
@@ -244,6 +288,8 @@ public class VideoView extends SurfaceView
             }
 
             mMediaPlayer.setTime(milliSeconds);
+
+            updateTimedText();
         }
     }
 
@@ -349,6 +395,103 @@ public class VideoView extends SurfaceView
             }
         } catch (Exception e) {
             Log.d(TAG, e.toString());
+        }
+    }
+
+    private void startTimedTextProcessing(final String subtitlePath) {
+        stopTimedTextProcessing();
+
+        mTimedTextProcessingTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                mTimedTextObject = TimedTextUtil.getTimedTextObject(subtitlePath);
+
+                if(mTimedTextObject != null) {
+                    mTimedTextLoaded = true;
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                if(!mTimedTextLoaded) {
+                    return;
+                }
+
+                mTimedTextProcessor = new TimerTask() {
+                    @Override
+                    public void run() {
+                        updateTimedText();
+
+                        mTimedTextHandler.postDelayed(this, 100);
+                    }
+                };
+
+                mTimedTextHandler.post(mTimedTextProcessor);
+            }
+        };
+
+        mTimedTextProcessingTask.execute();
+    }
+
+    private void stopTimedTextProcessing() {
+        mTimedTextLoaded = false;
+        mTimedTextObject = null;
+
+        if(mTimedTextProcessingTask != null) {
+            mTimedTextProcessingTask.cancel(true);
+            mTimedTextProcessingTask = null;
+        }
+
+        if(mTimedTextProcessor != null) {
+            mTimedTextProcessor.cancel();
+            mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
+            mTimedTextProcessor = null;
+        }
+    }
+
+    private void pauseTimedTextProcessing() {
+        if(mTimedTextProcessor != null) {
+            mTimedTextProcessor.cancel();
+            mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
+        }
+    }
+
+    private void resumeTimedTextProcessing() {
+        if(mTimedTextLoaded) {
+            if(mTimedTextProcessor != null) {
+                mTimedTextProcessor.cancel();
+                mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
+            }
+
+            mTimedTextHandler.post(mTimedTextProcessor);
+        }
+    }
+
+    private void updateTimedText() {
+        if (mMediaPlayer != null && !mMediaPlayer.isReleased() && mTimedTextObject != null) {
+            int currentPosition = getCurrentPosition();
+            Collection<Caption> subtitles = mTimedTextObject.captions.values();
+
+            Caption currentCaption = null;
+
+            for (Caption caption : subtitles) {
+                if (currentPosition >= caption.start.getMseconds()
+                        && currentPosition <= caption.end.getMseconds()) {
+                    currentCaption = caption;
+
+                    break;
+                }
+            }
+
+            Spanned spanned = currentCaption == null
+                    ? null
+                    : Html.fromHtml(currentCaption.content);
+
+            if(mOnTimedTextListener != null) {
+                mOnTimedTextListener.onTimedText(spanned);
+            }
         }
     }
 }

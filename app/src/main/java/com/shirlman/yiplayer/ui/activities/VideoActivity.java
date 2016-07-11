@@ -1,11 +1,13 @@
 package com.shirlman.yiplayer.ui.activities;
 
-import android.net.Uri;
+import android.media.MediaPlayer;
+import android.media.TimedText;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spanned;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +22,9 @@ import com.shirlman.yiplayer.models.VideoInfo;
 import com.shirlman.yiplayer.util.StringUtils;
 
 import org.videolan.libvlc.media.VideoView;
+import org.videolan.libvlc.subtitle.SubtitleFormat;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,6 +35,7 @@ public class VideoActivity extends AppCompatActivity {
     private VideoView mVideoView;
     private VideoInfo mVideoInfo;
     private SurfaceView mSubtitleView;
+    private TextView mTimedSubtitleView;
 
     // Video controller
     private View mVideoControllerLayout;
@@ -68,6 +73,8 @@ public class VideoActivity extends AppCompatActivity {
 
         mVideoView = (VideoView) findViewById(R.id.video_view);
         mSubtitleView = (SurfaceView) findViewById(R.id.subtitle_view);
+        mTimedSubtitleView = (TextView) findViewById(R.id.timed_subtitle_view);
+        mTimedSubtitleView.setVisibility(View.INVISIBLE);
 
         // Video controller
         mVideoControllerLayout = findViewById(R.id.video_controller_layout);
@@ -78,11 +85,13 @@ public class VideoActivity extends AppCompatActivity {
         mVideoControllerVideoSeekBar = (SeekBar) mVideoControllerRootView.findViewById(R.id.video_controller_seek_bar);
         mVideoControllerPlayOrPause = (ImageButton) mVideoControllerRootView.findViewById(R.id.video_controller_play_pause);
         mVideoControllerVideoLock = (ImageButton) mVideoControllerRootView.findViewById(R.id.video_controller_lock);
-        mVideoControllerRootView.setVisibility(View.GONE);
+        mVideoControllerRootView.setVisibility(View.INVISIBLE);
 
         String videoPath = mVideoInfo.getPath();
         mVideoView.setVideoPath(videoPath);
-        mVideoView.addTimedTextSource(mSubtitleView, videoPath);
+
+//        mVideoView.addSubtitleSource(mSubtitleView, videoPath);
+        mVideoView.addTimedTextSource(videoPath);
 
         mVideoView.setOnPreparedListener(mOnPreparedListener);
 
@@ -125,6 +134,7 @@ public class VideoActivity extends AppCompatActivity {
 
         mVideoView.setOnCurrentTimeUpdateListener(mOnCurrentTimeUpdateListener);
         mVideoView.setOnCompletionListener(mOnCompletionListener);
+        mVideoView.setOnTimedTextListener(mOnTimedTextListener);
     }
 
     private void startHideVideoControllerTimer() {
@@ -188,6 +198,18 @@ public class VideoActivity extends AppCompatActivity {
         @Override
         public void onCompletion() {
             finish();
+        }
+    };
+
+    private VideoView.OnTimedTextListener mOnTimedTextListener = new VideoView.OnTimedTextListener() {
+        @Override
+        public void onTimedText(Spanned spanned) {
+            if(spanned == null) {
+                mTimedSubtitleView.setVisibility(View.INVISIBLE);
+            } else {
+                mTimedSubtitleView.setVisibility(View.VISIBLE);
+                mTimedSubtitleView.setText(spanned);
+            }
         }
     };
 

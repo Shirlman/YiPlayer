@@ -25,7 +25,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/video_subtitle"
+        android:id="@+id/timed_subtitle_view"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
@@ -35,7 +35,6 @@
         android:textColor="@color/white"
         android:padding="5dp"
         android:maxWidth="600dp"
-        android:visibility="gone"
         android:text="subtitle too much long, subtitle too much long, subtitle too much long, subtitle too much long"/>
 
     <include layout="@layout/video_controller" />

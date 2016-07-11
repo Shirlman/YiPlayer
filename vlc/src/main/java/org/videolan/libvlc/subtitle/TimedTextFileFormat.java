@@ -1,4 +1,4 @@
-package com.shirlman.subtitle;
+package org.videolan.libvlc.subtitle;
 
 import java.io.IOException;
 import java.io.InputStream;

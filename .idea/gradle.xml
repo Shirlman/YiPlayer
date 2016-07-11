@@ -9,7 +9,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/subtitle" />
             <option value="$PROJECT_DIR$/vlc" />
           </set>
         </option>
@@ -17,7 +16,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/subtitle" />
             <option value="$PROJECT_DIR$/vlc" />
           </set>
         </option>

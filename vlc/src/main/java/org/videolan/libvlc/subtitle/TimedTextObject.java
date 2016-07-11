@@ -1,4 +1,4 @@
-package com.shirlman.subtitle;
+package org.videolan.libvlc.subtitle;
 
 import java.util.Hashtable;
 import java.util.Iterator;

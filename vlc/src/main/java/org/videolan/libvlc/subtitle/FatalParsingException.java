@@ -1,4 +1,4 @@
-package com.shirlman.subtitle;
+package org.videolan.libvlc.subtitle;
 
 /**
  * This class represents problems that may arise during the parsing of a subttile file.

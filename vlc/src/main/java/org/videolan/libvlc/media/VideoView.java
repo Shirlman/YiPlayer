@@ -10,11 +10,9 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Html;
 import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,12 +23,7 @@ import android.widget.MediaController;
 
 import org.videolan.libvlc.*;
 import org.videolan.libvlc.MediaPlayer;
-import org.videolan.libvlc.subtitle.Caption;
-import org.videolan.libvlc.subtitle.TimedTextObject;
-import org.videolan.libvlc.subtitle.TimedTextUtil;
-
-import java.util.Collection;
-import java.util.TimerTask;
+import org.videolan.libvlc.subtitle.TimedTextProcessor;
 
 public class VideoView extends SurfaceView
         implements MediaController.MediaPlayerControl, IVLCVout.Callback, MediaPlayer.EventListener {
@@ -45,13 +38,8 @@ public class VideoView extends SurfaceView
     private SurfaceView mSubtitlesView;
     private boolean mPausable;
     private int mBufferPercentage;
-    private String mVideoPath;
     private String mTimedTextPath;
-    private boolean mTimedTextLoaded;
-    private AsyncTask mTimedTextProcessingTask;
-    private TimerTask mTimedTextProcessor;
-    private TimedTextObject mTimedTextObject;
-    private Handler mTimedTextHandler = new Handler();
+    private TimedTextProcessor mTimedTextProcessor;
 
     private final int MSG_PREPARED = 0;
     private final int MSG_COMPLETION = 1;
@@ -180,14 +168,26 @@ public class VideoView extends SurfaceView
         mLibVLC = new LibVLC();
         mMediaPlayer = new MediaPlayer(mLibVLC);
 
+        mTimedTextProcessor = new TimedTextProcessor() {
+            @Override
+            public void onTimedText(Spanned spanned) {
+                if(mOnTimedTextListener != null) {
+                    mOnTimedTextListener.onTimedText(spanned);
+                }
+            }
+
+            @Override
+            public int getCurrentPosition() {
+                return VideoView.this.getCurrentPosition();
+            }
+        };
+
         getHolder().setKeepScreenOn(true);
     }
 
     public void setVideoPath(String path) {
         Media media = new Media(mLibVLC, path);
         mMediaPlayer.setMedia(media);
-
-        mVideoPath = path;
     }
 
     public void setVideoURI(Uri uri) {
@@ -230,7 +230,7 @@ public class VideoView extends SurfaceView
         }
 
         if(mTimedTextPath != null) {
-            startTimedTextProcessing(mTimedTextPath);
+            mTimedTextProcessor.start(mTimedTextPath);
         }
 
         mMediaPlayer.getVLCVout().attachViews();
@@ -244,7 +244,7 @@ public class VideoView extends SurfaceView
     public void pause() {
         mMediaPlayer.pause();
 
-        pauseTimedTextProcessing();
+        mTimedTextProcessor.pause();
     }
 
     public void resume() {
@@ -254,20 +254,20 @@ public class VideoView extends SurfaceView
             start();
         }
 
-        resumeTimedTextProcessing();
+        mTimedTextProcessor.resume();
     }
 
     public void stop() {
         mMediaPlayer.stop();
 
-        stopTimedTextProcessing();
+        mTimedTextProcessor.stop();
     }
 
     public void release() {
         mMediaPlayer.stop();
         mMediaPlayer.release();
 
-        stopTimedTextProcessing();
+        mTimedTextProcessor.stop();
     }
 
     @Override
@@ -277,7 +277,15 @@ public class VideoView extends SurfaceView
 
     @Override
     public int getCurrentPosition() {
-        return (int) mMediaPlayer.getTime();
+        int currentPosition;
+
+        if(!mMediaPlayer.isReleased()) {
+            currentPosition = -1;
+        } else {
+            currentPosition = (int) mMediaPlayer.getTime();
+        }
+
+        return currentPosition;
     }
 
     @Override
@@ -289,7 +297,7 @@ public class VideoView extends SurfaceView
 
             mMediaPlayer.setTime(milliSeconds);
 
-            updateTimedText();
+            mTimedTextProcessor.updateTimedText();
         }
     }
 
@@ -395,103 +403,6 @@ public class VideoView extends SurfaceView
             }
         } catch (Exception e) {
             Log.d(TAG, e.toString());
-        }
-    }
-
-    private void startTimedTextProcessing(final String subtitlePath) {
-        stopTimedTextProcessing();
-
-        mTimedTextProcessingTask = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                mTimedTextObject = TimedTextUtil.getTimedTextObject(subtitlePath);
-
-                if(mTimedTextObject != null) {
-                    mTimedTextLoaded = true;
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Object o) {
-                if(!mTimedTextLoaded) {
-                    return;
-                }
-
-                mTimedTextProcessor = new TimerTask() {
-                    @Override
-                    public void run() {
-                        updateTimedText();
-
-                        mTimedTextHandler.postDelayed(this, 100);
-                    }
-                };
-
-                mTimedTextHandler.post(mTimedTextProcessor);
-            }
-        };
-
-        mTimedTextProcessingTask.execute();
-    }
-
-    private void stopTimedTextProcessing() {
-        mTimedTextLoaded = false;
-        mTimedTextObject = null;
-
-        if(mTimedTextProcessingTask != null) {
-            mTimedTextProcessingTask.cancel(true);
-            mTimedTextProcessingTask = null;
-        }
-
-        if(mTimedTextProcessor != null) {
-            mTimedTextProcessor.cancel();
-            mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
-            mTimedTextProcessor = null;
-        }
-    }
-
-    private void pauseTimedTextProcessing() {
-        if(mTimedTextProcessor != null) {
-            mTimedTextProcessor.cancel();
-            mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
-        }
-    }
-
-    private void resumeTimedTextProcessing() {
-        if(mTimedTextLoaded) {
-            if(mTimedTextProcessor != null) {
-                mTimedTextProcessor.cancel();
-                mTimedTextHandler.removeCallbacks(mTimedTextProcessor);
-            }
-
-            mTimedTextHandler.post(mTimedTextProcessor);
-        }
-    }
-
-    private void updateTimedText() {
-        if (mMediaPlayer != null && !mMediaPlayer.isReleased() && mTimedTextObject != null) {
-            int currentPosition = getCurrentPosition();
-            Collection<Caption> subtitles = mTimedTextObject.captions.values();
-
-            Caption currentCaption = null;
-
-            for (Caption caption : subtitles) {
-                if (currentPosition >= caption.start.getMseconds()
-                        && currentPosition <= caption.end.getMseconds()) {
-                    currentCaption = caption;
-
-                    break;
-                }
-            }
-
-            Spanned spanned = currentCaption == null
-                    ? null
-                    : Html.fromHtml(currentCaption.content);
-
-            if(mOnTimedTextListener != null) {
-                mOnTimedTextListener.onTimedText(spanned);
-            }
         }
     }
 }

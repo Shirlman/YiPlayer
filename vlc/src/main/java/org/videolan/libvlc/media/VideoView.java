@@ -39,6 +39,7 @@ public class VideoView extends SurfaceView
     private boolean mPausable;
     private int mBufferPercentage;
     private String mTimedTextPath;
+    private Uri mTimedTextUri;
     private TimedTextProcessor mTimedTextProcessor;
 
     private final int MSG_PREPARED = 0;
@@ -100,6 +101,14 @@ public class VideoView extends SurfaceView
 
     public void setOnTimedTextListener(OnTimedTextListener onTimedTextListener) {
         mOnTimedTextListener = onTimedTextListener;
+    }
+
+    public void enableTimedText() {
+
+    }
+
+    public void disableTimedText() {
+
     }
 
     private Handler mHandler = new Handler() {
@@ -210,7 +219,7 @@ public class VideoView extends SurfaceView
     }
 
     public void addTimedTextSource(Uri uri) {
-
+        mTimedTextUri = uri;
     }
 
     private void setSubtitlesSurfaceView(SurfaceView surfaceView) {
@@ -231,6 +240,8 @@ public class VideoView extends SurfaceView
 
         if(mTimedTextPath != null) {
             mTimedTextProcessor.start(mTimedTextPath);
+        } else if(mTimedTextUri != null) {
+            mTimedTextProcessor.start(mTimedTextUri);
         }
 
         mMediaPlayer.getVLCVout().attachViews();
@@ -272,7 +283,15 @@ public class VideoView extends SurfaceView
 
     @Override
     public int getDuration() {
-        return (int) mMediaPlayer.getLength();
+        int duration;
+
+        if(!mMediaPlayer.isReleased()) {
+            duration = (int) mMediaPlayer.getLength();
+        } else {
+            duration = 0;
+        }
+
+        return duration;
     }
 
     @Override
@@ -280,9 +299,9 @@ public class VideoView extends SurfaceView
         int currentPosition;
 
         if(!mMediaPlayer.isReleased()) {
-            currentPosition = -1;
-        } else {
             currentPosition = (int) mMediaPlayer.getTime();
+        } else {
+            currentPosition = 0;
         }
 
         return currentPosition;

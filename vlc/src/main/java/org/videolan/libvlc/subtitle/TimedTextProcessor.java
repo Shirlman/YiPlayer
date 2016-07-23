@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -14,13 +15,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 /**
  * Created by KB-Server on 2016/7/11.
  */
 public abstract class TimedTextProcessor {
+    private final String TAG = TimedTextProcessor.class.getName();
+
     private boolean mTimedTextLoaded;
     private AsyncTask mTimedTextProcessingTask;
     private TimerTask mTimedTextProcessor;
@@ -31,37 +37,25 @@ public abstract class TimedTextProcessor {
 
     public abstract int getCurrentPosition();
 
-//    public static void startTimedTextProcessingTask(final Uri uri) {
-//        mTimedTextProcessingTask = new AsyncTask() {
-//            @Override
-//            protected Object doInBackground(Object[] objects) {
-//                try {
-//                    URL url = new URL(uri.getPath());
-//                    InputStream inputStream = url.openStream();
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                return null;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Object o) {
-//
-//                super.onPostExecute(o);
-//            }
-//        };
-//    }
+    public void start(final Uri uri) {
+        start(null, uri);
+    }
 
-    public void start(final String subtitlePath) {
+    public void start(final String path) {
+        start(path, null);
+    }
+
+    private void start(final String path, final Uri uri) {
         stop();
 
         mTimedTextProcessingTask = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
-                mTimedTextObject = getTimedTextObject(subtitlePath);
+                if(path != null) {
+                    mTimedTextObject = getTimedTextObject(path);
+                } else if(uri != null) {
+                    mTimedTextObject = getTimedTextObject(uri);
+                }
 
                 if(mTimedTextObject != null) {
                     mTimedTextLoaded = true;
@@ -127,6 +121,10 @@ public abstract class TimedTextProcessor {
     }
 
     public void updateTimedText() {
+        if(mTimedTextObject == null || mTimedTextObject.captions == null) {
+            return;
+        }
+
         int currentPosition = getCurrentPosition();
 
         if(currentPosition < 0) {
@@ -153,8 +151,63 @@ public abstract class TimedTextProcessor {
         onTimedText(spanned);
     }
 
+    private TimedTextObject getTimedTextObject(Uri uri) {
+        TimedTextObject timedTextObject = null;
+
+        String path = uri.getPath();
+        String subtitleFormat = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
+        String fileName = path.substring(0, path.lastIndexOf("."));
+
+        if(fileName.lastIndexOf("/") != -1) {
+            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+        }
+
+        try {
+            URL url = new URL(uri.toString());
+            InputStream inputStream = url.openStream();
+
+            switch (subtitleFormat) {
+                case SubtitleFormat.ASS:
+                    timedTextObject = new FormatASS().parseFile(fileName, inputStream);
+                    break;
+                case SubtitleFormat.SCC:
+                    timedTextObject = new FormatSCC().parseFile(fileName, inputStream);
+                    break;
+                case SubtitleFormat.SRT:
+                    timedTextObject = new FormatSRT().parseFile(fileName, inputStream);
+                    break;
+                case SubtitleFormat.STL:
+                    timedTextObject = new FormatSTL().parseFile(fileName, inputStream);
+                    break;
+                case SubtitleFormat.TTML:
+                    timedTextObject = new FormatTTML().parseFile(fileName, inputStream);
+                    break;
+                default:
+                    break;
+            }
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "doInBackground: ", e);
+        } catch (IOException e) {
+            Log.e(TAG, "doInBackground: ", e);
+        } catch (FatalParsingException e) {
+            Log.e(TAG, "doInBackground: ", e);
+        } catch (Exception e) {
+            Log.e(TAG, "doInBackground: ", e);
+        }
+
+        if(timedTextObject != null && timedTextObject.warnings != null && !timedTextObject.warnings.isEmpty()) {
+            Log.w(TAG, "getTimedTextObject: " + timedTextObject.warnings);
+        }
+
+        return timedTextObject;
+    }
+
     private TimedTextObject getTimedTextObject(String path) {
         TimedTextObject timedTextObject = null;
+
+        if(!new File(path).exists()) {
+            return timedTextObject;
+        }
 
         String subtitleFormat = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
         String fileName = path.substring(0, path.lastIndexOf("."));
@@ -197,6 +250,10 @@ public abstract class TimedTextProcessor {
             e.printStackTrace();
         } catch (FatalParsingException e) {
             e.printStackTrace();
+        }
+
+        if(timedTextObject != null && timedTextObject.warnings != null && !timedTextObject.warnings.isEmpty()) {
+            Log.w(TAG, "getTimedTextObject: " + timedTextObject.warnings);
         }
 
         return timedTextObject;

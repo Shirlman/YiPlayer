@@ -2,7 +2,9 @@ package com.shirlman.yiplayer.ui.activities;
 
 import android.media.MediaPlayer;
 import android.media.TimedText;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -92,7 +94,6 @@ public class VideoActivity extends AppCompatActivity {
 
 //        mVideoView.addSubtitleSource(mSubtitleView, videoPath);
         mVideoView.addTimedTextSource(videoPath);
-
         mVideoView.setOnPreparedListener(mOnPreparedListener);
 
         mVideoView.start();

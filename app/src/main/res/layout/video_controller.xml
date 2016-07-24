@@ -3,6 +3,37 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/video_controller_layout">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/word_translation_view"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="@color/media_controller_bg"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:maxWidth="600dp"
+        android:text="Translation"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timed_subtitle_view"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:background="@color/media_controller_bg"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:maxWidth="600dp"
+        android:clickable="true"
+        android:text="subtitle too much long, subtitle too much long, subtitle too much long, subtitle too much long"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

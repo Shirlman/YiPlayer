@@ -6,4 +6,6 @@
 
     <string name="action_settings">Settings</string>
     <string name="local_video_count">%1$d个视频</string>
+
+    <string name="word_not_queried">未查询到单词:%1$s</string>
 </resources>

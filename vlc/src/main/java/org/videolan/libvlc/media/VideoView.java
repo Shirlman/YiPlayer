@@ -104,11 +104,15 @@ public class VideoView extends SurfaceView
     }
 
     public void enableTimedText() {
-
+        mTimedTextProcessor.resume();
     }
 
     public void disableTimedText() {
+        mTimedTextProcessor.pause();
+    }
 
+    public void updateTimedText() {
+        mTimedTextProcessor.updateTimedText();
     }
 
     private Handler mHandler = new Handler() {

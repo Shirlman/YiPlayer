@@ -105,46 +105,6 @@ public class FileUtils {
 		mHashAudio = new HashSet<String>(Arrays.asList(AUDIO_EXTENSIONS));
 	}
 
-	public static List<VideoInfo> getVideoFile(final List<VideoInfo> list, File file) {
-		file.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File file, String filename) {
-				if (file.isDirectory()) {
-					getVideoFile(list, file);
-				} else if (isVideo(file) && file.length() > 10485760) {
-					VideoInfo video = new VideoInfo();
-					video.setSize(file.length() / 1024 / 1024);
-					video.setTitle(file.getName());
-					video.setPath(file.getAbsolutePath());
-					Log.i("tga", "name" + video.getPath());
-
-					list.add(video);
-					return true;
-				}
-
-				return false;
-			}
-		});
-
-		return list;
-	}
-
-	/** 是否是音频或者视频 */
-	public static boolean isVideoOrAudio(File f) {
-		final String ext = getFileExtension(f);
-		return mHashVideo.contains(ext) || mHashAudio.contains(ext);
-	}
-
-	public static boolean isVideoOrAudio(String f) {
-		final String ext = getUrlExtension(f);
-		return mHashVideo.contains(ext) || mHashAudio.contains(ext);
-	}
-
-	public static boolean isVideo(File f) {
-		final String ext = getFileExtension(f);
-		return mHashVideo.contains(ext);
-	}
-
 	/** 获取文件后缀 */
 	public static String getFileExtension(File f) {
 		if (f != null) {
@@ -167,16 +127,6 @@ public class FileUtils {
 			filenameWithoutExtension = url.substring(slashIndex + 1, dotIndex);
 		}
 		return filenameWithoutExtension;
-	}
-
-	public static String getUrlExtension(String url) {
-		if (!StringUtils.isEmpty(url)) {
-			int i = url.lastIndexOf('.');
-			if (i > 0 && i < url.length() - 1) {
-				return url.substring(i + 1).toLowerCase();
-			}
-		}
-		return "";
 	}
 
 	public static String getFileNameNoEx(String filename) {

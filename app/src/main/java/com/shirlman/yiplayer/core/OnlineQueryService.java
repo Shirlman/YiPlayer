@@ -1,6 +1,8 @@
 package com.shirlman.yiplayer.core;
 
 import com.shirlman.yiplayer.models.ICibaResponse;
+import com.shirlman.yiplayer.models.ShooterSubtitleDetailResponse;
+import com.shirlman.yiplayer.models.ShooterSubtitleResponse;
 import com.shirlman.yiplayer.models.YoudaoResponse;
 
 import java.util.Map;
@@ -22,4 +24,10 @@ public interface OnlineQueryService {
 
     @GET("http://dict-co.iciba.com/api/dictionary.php")
     Call<ICibaResponse> queryWordFromICiba(@QueryMap Map<String, Object> filters);
+
+    @GET("http://api.assrt.net/v1/sub/search")
+    Call<ShooterSubtitleResponse> querySubtitleFromShooter(@QueryMap Map<String, Object> filters);
+
+    @GET("http://api.assrt.net/v1/sub/detail")
+    Call<ShooterSubtitleDetailResponse> getSubtitleDetailFromShooter(@QueryMap Map<String, Object> filters);
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/online_subtitle_controller"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/media_controller_bg" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/online_subtitle_close"
+            android:text="X"
+            android:textSize="25sp"
+            android:padding="5dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:id="@+id/online_subtitle_search_box"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="search"
+            android:maxLines="1"
+            android:maxLength="100"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/online_subtitle_search_button"
+            android:text="搜索"/>
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/online_subtitle_recycler_view"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager" >
+
+    </android.support.v7.widget.RecyclerView>
+</LinearLayout>

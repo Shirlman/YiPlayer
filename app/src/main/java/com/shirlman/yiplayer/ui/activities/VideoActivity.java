@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -16,6 +17,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -24,8 +26,10 @@ import android.widget.Toast;
 import com.shirlman.yiplayer.R;
 import com.shirlman.yiplayer.core.OnlineQueryService;
 import com.shirlman.yiplayer.models.ICibaResponse;
+import com.shirlman.yiplayer.models.ShooterSubtitleResponse;
 import com.shirlman.yiplayer.models.VideoInfo;
 import com.shirlman.yiplayer.models.YoudaoResponse;
+import com.shirlman.yiplayer.ui.adapters.OnlineSubtitleAdapter;
 import com.shirlman.yiplayer.util.StringUtils;
 
 import org.videolan.libvlc.media.VideoView;
@@ -77,6 +81,13 @@ public class VideoActivity extends AppCompatActivity {
     private TextView mTimedSubtitleView;
     private TextView mTranslationView;
 
+    // Online subtitle
+    private View mOnlineSubtitleButton;
+    private View mOnlineSubtitleController;
+    private View mOnlineSubtitleCloseButton;
+    private EditText mOnlineSubtitleSearchBox;
+    private View mOnlineSubtitleSearchButton;
+
     // Handler message
     private final int MSG_HIDE_VIDEO_CONTROLLER = 0;
     private final int MSG_HIDE_EXPLANATION = 1;
@@ -112,8 +123,17 @@ public class VideoActivity extends AppCompatActivity {
         mTimedSubtitleView = (TextView) findViewById(R.id.timed_subtitle_view);
         mTranslationView = (TextView) findViewById(R.id.word_translation_view);
 
+        // Online subtitle
+        mOnlineSubtitleButton = findViewById(R.id.online_subtitle_button);
+        mOnlineSubtitleController = findViewById(R.id.online_subtitle_controller);
+        mOnlineSubtitleCloseButton = findViewById(R.id.online_subtitle_close);
+        mOnlineSubtitleSearchBox = (EditText) findViewById(R.id.online_subtitle_search_box);
+        mOnlineSubtitleSearchButton = findViewById(R.id.online_subtitle_search_button);
+
         mTimedSubtitleView.setVisibility(View.INVISIBLE);
         mVideoControllerRootView.setVisibility(View.INVISIBLE);
+        mOnlineSubtitleController.setVisibility(View.INVISIBLE);
+        mTranslationView.setVisibility(View.INVISIBLE);
 
         String videoPath = mVideoInfo.getPath();
         mVideoView.setVideoPath(videoPath);
@@ -148,11 +168,13 @@ public class VideoActivity extends AppCompatActivity {
 
     private void initVideoController() {
         mVideoControllerLayout.setOnClickListener(mVideoControllerOnClickListener);
-        mVideoControllerVideoTitle.setText(mVideoInfo.getTitle());
+        mVideoControllerVideoTitle.setText(mVideoInfo.getDisplayName());
         mVideoControllerTotalTime.setText(StringUtils.getTimeDisplayString(mVideoView.getDuration()));
         mVideoControllerPlayOrPause.setOnClickListener(mOnPlayOrPauseClickListener);
         mVideoControllerVideoLock.setOnClickListener(mOnLockClickListener);
         mVideoControllerSettings.setOnClickListener(mOnSettingsClickListener);
+
+        mOnlineSubtitleButton.setOnClickListener(mOnlineSubtitleButtonClickListener);
 
         if(mVideoView.canSeekForward() || mVideoView.canSeekBackward()) {
             mVideoControllerVideoSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
@@ -273,12 +295,14 @@ public class VideoActivity extends AppCompatActivity {
                 }
 
                 if(StringUtils.notNullNorEmpty(timedText)) {
-                    SpannableString spannableStringBuilder = getClickableSpan(timedText);
+                    if(!mTimedSubtitleView.getText().toString().equals(timedText)) {
+                        SpannableString spannableStringBuilder = getClickableSpan(timedText);
 
-                    mTimedSubtitleView.setVisibility(View.VISIBLE);
-                    mTimedSubtitleView.setText(spannableStringBuilder);
-                    mTimedSubtitleView.setMovementMethod(LinkMovementMethod.getInstance());
-                    mTimedSubtitleView.setLongClickable(false);
+                        mTimedSubtitleView.setVisibility(View.VISIBLE);
+                        mTimedSubtitleView.setText(spannableStringBuilder);
+                        mTimedSubtitleView.setMovementMethod(LinkMovementMethod.getInstance());
+                        mTimedSubtitleView.setLongClickable(false);
+                    }
                 } else {
                     mTimedSubtitleView.setVisibility(View.INVISIBLE);
                 }
@@ -499,6 +523,72 @@ public class VideoActivity extends AppCompatActivity {
             mVideoView.updateTimedText();
         }
     };
+
+    private View.OnClickListener mOnSubtitleCloseButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mOnlineSubtitleController.setVisibility(View.INVISIBLE);
+        }
+    };
+
+    private View.OnClickListener mOnSubtitleSearchButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String searchKeyword = mOnlineSubtitleSearchBox.getText().toString().trim();
+            searchSubtitleFromShooter(searchKeyword);
+        }
+    };
+
+    private View.OnClickListener mOnlineSubtitleButtonClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            mOnlineSubtitleController.setVisibility(View.VISIBLE);
+            mOnlineSubtitleCloseButton.setOnClickListener(mOnSubtitleCloseButtonClickListener);
+            mOnlineSubtitleSearchButton.setOnClickListener(mOnSubtitleSearchButtonClickListener);
+            mOnlineSubtitleSearchBox.setText(mVideoInfo.getTitle());
+
+            searchSubtitleFromShooter(mVideoInfo.getTitle());
+        }
+    };
+
+    private void searchSubtitleFromShooter(String keyword) {
+        String shooterBaseUrl = "http://api.assrt.net/v1/sub/search/";
+        String shooterToken = "5fjG5Znw0KgfqL1QmDffB3A7qzaGAXzF";
+        String count = "20";
+        String page = "0";
+
+        Map<String, Object> searchFilters = new LinkedHashMap<>();
+        searchFilters.put("token", shooterToken);
+        searchFilters.put("cnt", count);
+        searchFilters.put("pos", page);
+        searchFilters.put("q", keyword);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(shooterBaseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        OnlineQueryService service = retrofit.create(OnlineQueryService.class);
+        service.querySubtitleFromShooter(searchFilters).enqueue(new Callback<ShooterSubtitleResponse>() {
+            @Override
+            public void onResponse(Call<ShooterSubtitleResponse> call, Response<ShooterSubtitleResponse> response) {
+                if(response.isSuccessful() && response.body() != null && response.body().getSub() != null) {
+                    RecyclerView onlineSubtitleRecyclerView =
+                            (RecyclerView) mOnlineSubtitleController.findViewById(R.id.online_subtitle_recycler_view);
+
+                    OnlineSubtitleAdapter onlineSubtitleAdapter = new OnlineSubtitleAdapter(VideoActivity.this, response.body().getSub().getSubs());
+
+                    onlineSubtitleRecyclerView.setAdapter(onlineSubtitleAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ShooterSubtitleResponse> call, Throwable t) {
+                Log.e(TAG, "querySubtitleFromShooter.onFailure: ", t);
+            }
+        });
+    }
 
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override

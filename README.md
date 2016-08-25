@@ -1,11 +1,15 @@
 # YiPlayer
 A video player which can help users to learn English through videos. 
-Custom VideoView based on VLC Android SDK(Version 2.0.2), implement most interface, can be used like Android VideoView
 > **Current Feature:**
 
-> - View local videos
-> - Basic video controll, like play, pause, resume, lock
+> - Play local videos
+> - Basic video control, like play, pause, resume, lock
 > - Support local subtitle
+> - Implement setOnTimedTextListener
+> - Query word from iCiba
+> - Query subtitle from shooter.cn
+
+If you want to use VideoView library(Based on VLC Android SDK 2.0.2), you can copy the VLC library to your project, it's totally independent.
 
 ![YiPlayer Screenshot1](https://github.com/Shirlman/YiPlayer/blob/master/images/com.shirlman.yiplayer_video_controller.png) | ![YiPlayer Screenshot2](https://github.com/Shirlman/YiPlayer/blob/master/images/com.shirlman.yiplayer_main_activity.png) 
 ------ | -----  | -----
